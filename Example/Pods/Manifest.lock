@@ -1,0 +1,14 @@
+PODS:
+  - CKDraggableModalController (0.1.0)
+
+DEPENDENCIES:
+  - CKDraggableModalController (from `../`)
+
+EXTERNAL SOURCES:
+  CKDraggableModalController:
+    :path: ../
+
+SPEC CHECKSUMS:
+  CKDraggableModalController: f2729f39f006704ad365ed0d2a5625ed14f76cda
+
+COCOAPODS: 0.36.0.beta.1
