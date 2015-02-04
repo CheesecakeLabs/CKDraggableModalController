@@ -1,0 +1,11 @@
+source 'https://github.com/CocoaPods/Specs.git'
+
+target 'CKDraggableModalController', :exclusive => true do
+  pod "CKDraggableModalController", :path => "../"
+end
+
+target 'Tests', :exclusive => true do
+  pod "CKDraggableModalController", :path => "../"
+
+  
+end
