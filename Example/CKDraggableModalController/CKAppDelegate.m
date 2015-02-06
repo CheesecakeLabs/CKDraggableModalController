@@ -21,13 +21,22 @@
 	backViewController.view.backgroundColor = [UIColor redColor];
 	frontViewController.view.backgroundColor = [UIColor blueColor];
 
-	CKDraggableViewController *draggableViewController = [[CKDraggableViewController alloc] initWithFrontViewController:frontViewController backViewController:backViewController];
-	draggableViewController.closedOffset = 45.f;
+	self.draggableViewController = [[CKDraggableViewController alloc] initWithFrontViewController:frontViewController backViewController:backViewController];
+	self.draggableViewController.closedOffset = 45.f;
 
-	[self.window setRootViewController:draggableViewController];
+	UINavigationController *navigationController = [[UINavigationController alloc] initWithRootViewController:self.draggableViewController];
+	navigationController.navigationBar.translucent = YES;
+	navigationController.navigationBar.topItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(open)];
+
+	[self.window setRootViewController:navigationController];
 	[self.window makeKeyAndVisible];
 
 	return YES;
+}
+
+- (void)open
+{
+	[self.draggableViewController open:!self.draggableViewController.open animated:YES];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application

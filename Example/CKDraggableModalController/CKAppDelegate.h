@@ -8,8 +8,11 @@
 
 #import <UIKit/UIKit.h>
 
+@class CKDraggableViewController;
+
 @interface CKAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 
+@property(nonatomic, strong) CKDraggableViewController *draggableViewController;
 @end

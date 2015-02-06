@@ -15,10 +15,12 @@ static const float kInitialClosedOffset = 45.f;
 @property(nonatomic, strong) UIViewController *backViewController;
 @property(nonatomic, strong) UIViewController *frontViewController;
 
-@property BOOL open;
+@property(readonly) BOOL open;
 
 @property CGFloat closedOffset;
 @property CGFloat openedOffset;
 
 - (instancetype)initWithFrontViewController:(UIViewController *)frontViewController backViewController:(UIViewController *)backViewController;
+
+- (void)open:(BOOL)open animated:(BOOL)animated;
 @end

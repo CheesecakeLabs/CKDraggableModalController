@@ -10,9 +10,14 @@
 
 @interface CKDraggableViewController ()
 
+@property CGFloat maxCenter;
+@property CGFloat minCenter;
+
 @end
 
 @implementation CKDraggableViewController
+
+#pragma mark - LifeCycle
 
 - (instancetype)initWithFrontViewController:(UIViewController *)frontViewController backViewController:(UIViewController *)backViewController
 {
@@ -20,17 +25,28 @@
 	if (self) {
 		self.frontViewController = frontViewController;
 		self.backViewController = backViewController;
+		self.closedOffset = kInitialClosedOffset;
 	}
 
 	return self;
 }
 
 
-- (void)viewDidLoad
+- (void)viewWillAppear:(BOOL)animated
 {
-	[super viewDidLoad];
+	[super viewWillAppear:animated];
+
 	[self initViews];
 }
+
+
+- (void)viewDidAppear:(BOOL)animated
+{
+	[super viewDidAppear:animated];
+
+	[self calculateMinAndMaxCenters];
+}
+
 
 - (void)didReceiveMemoryWarning
 {
@@ -39,12 +55,19 @@
 }
 
 
+- (void)calculateMinAndMaxCenters
+{
+	self.maxCenter = self.backViewController.view.center.y + self.topLayoutGuide.length;
+	self.minCenter = self.backViewController.view.center.y + self.frontViewController.view.frame.size.height - self.closedOffset;
+}
+
+
 - (void)initViews
 {
 	[self configureBackView];
 	[self configureFrontView];
-	self.closedOffset = kInitialClosedOffset;
-	[self setViewPositionForState];
+
+	[self setViewPositionForCurrentState];
 }
 
 - (void)configureFrontView
@@ -52,8 +75,30 @@
 	if (self.frontViewController) {
 		[self addChildViewController:self.frontViewController];
 		[self.view addSubview:self.frontViewController.view];
+
+		UIPanGestureRecognizer *gestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(onPanFrontView:)];
+		[self.frontViewController.view addGestureRecognizer:gestureRecognizer];
 	}
 }
+
+
+- (void)open:(BOOL)open animated:(BOOL)animated
+{
+	if (open != self.open) {
+		_open = open;
+
+		void (^changeState)() = ^{
+			[self setViewPositionForCurrentState];
+		};
+
+		if (animated) {
+			[UIView animateWithDuration:0.4 animations:changeState];
+		} else {
+			changeState;
+		}
+	}
+}
+
 
 - (void)configureBackView
 {
@@ -64,21 +109,27 @@
 }
 
 
-- (void)setViewPositionForState
+- (void)setViewPositionForCurrentState
 {
 	CGRect frame = self.view.frame;
-	frame.origin.y = frame.size.height - self.closedOffset;
+
+	frame.origin.y = self.open ? self.topLayoutGuide.length : frame.size.height - self.closedOffset;
+
 	self.frontViewController.view.frame = frame;
 }
 
-/*
-#pragma mark - Navigation
 
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+#pragma mark - Pan Gestures
+
+- (void)onPanFrontView:(UIPanGestureRecognizer *)recognizer
+{
+	CGPoint translation = [recognizer translationInView:self.view];
+	CGPoint center = CGPointMake(recognizer.view.center.x, recognizer.view.center.y + translation.y);
+
+	if (center.y >= self.maxCenter && center.y <= self.minCenter) {
+		recognizer.view.center = center;
+		[recognizer setTranslation:CGPointMake(0, 0) inView:self.view];
+	}
 }
-*/
 
 @end
