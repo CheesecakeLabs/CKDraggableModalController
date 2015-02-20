@@ -18,8 +18,8 @@
 	UIViewController *backViewController = [[UIViewController alloc] init];
 	UIViewController *frontViewController = [[UIViewController alloc] init];
 
-	backViewController.view.backgroundColor = [UIColor redColor];
-	frontViewController.view.backgroundColor = [UIColor blueColor];
+	backViewController.view.backgroundColor = [UIColor greenColor];
+	frontViewController.view.backgroundColor = [UIColor brownColor];
 
 	self.draggableViewController = [[CKDraggableViewController alloc] initWithFrontViewController:frontViewController backViewController:backViewController];
 	self.draggableViewController.closedOffset = 45.f;

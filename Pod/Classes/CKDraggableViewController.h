@@ -10,7 +10,7 @@
 
 static const float kInitialClosedOffset = 45.f;
 
-@interface CKDraggableViewController : UIViewController
+@interface CKDraggableViewController : UIViewController <UICollisionBehaviorDelegate, UIDynamicAnimatorDelegate>
 
 @property(nonatomic, strong) UIViewController *backViewController;
 @property(nonatomic, strong) UIViewController *frontViewController;
