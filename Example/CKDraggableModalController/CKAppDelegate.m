@@ -16,7 +16,7 @@
 	self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
 	// Override point for customization after application launch.
 	UIViewController *backViewController = [[UIViewController alloc] init];
-	UIViewController *frontViewController = [[UIViewController alloc] init];
+	UITableViewController *frontViewController = [[UITableViewController alloc] init];
 
 	backViewController.view.backgroundColor = [UIColor greenColor];
 	frontViewController.view.backgroundColor = [UIColor brownColor];

@@ -14,13 +14,8 @@
 @property(nonatomic) CGFloat maxCenter;
 @property(nonatomic) CGFloat minCenter;
 
-@property(nonatomic, strong) UIDynamicAnimator *animator;
-@property(nonatomic, strong) UIGravityBehavior *gravity;
-
 @property(nonatomic) BOOL goingUp;
 
-@property(nonatomic) CGFloat topOffset;
-@property(nonatomic) CGFloat bottomOffset;
 @end
 
 @implementation CKDraggableViewController
@@ -54,41 +49,12 @@
 	[super viewDidAppear:animated];
 
 	[self calculateMinAndMaxCenters];
-
-	[self initBehaviors];
-
-}
-
-
-- (void)initBehaviors
-{
-	self.animator = [[UIDynamicAnimator alloc] initWithReferenceView:self.view];
-	self.gravity = [[UIGravityBehavior alloc] initWithItems:@[self.frontViewController.view]];
-
-	UICollisionBehavior *collisionBehavior = [[UICollisionBehavior alloc] initWithItems:@[self.frontViewController.view]];
-	collisionBehavior.collisionDelegate = self;
-
-	CGFloat boundaryBottom = self.bottomOffset + self.frontViewController.view.frame.size.height;
-
-	CGPoint boundaryTopRight = CGPointMake(self.view.frame.size.width, self.topOffset);
-	CGPoint boundaryTopLeft = CGPointMake(0, self.topOffset);
-	CGPoint boundaryBottomLeft = CGPointMake(0, boundaryBottom);
-	CGPoint boundaryBottomRight = CGPointMake(self.view.frame.size.width, boundaryBottom);
-
-	[collisionBehavior addBoundaryWithIdentifier:@"top" fromPoint:boundaryTopLeft toPoint:boundaryTopRight];
-	[collisionBehavior addBoundaryWithIdentifier:@"bottom" fromPoint:boundaryBottomLeft toPoint:boundaryBottomRight];
-
-	[collisionBehavior addBoundaryWithIdentifier:@"left" fromPoint:boundaryTopLeft toPoint:boundaryBottomLeft];
-	[collisionBehavior addBoundaryWithIdentifier:@"right" fromPoint:boundaryTopRight toPoint:boundaryBottomRight];
-
-	[self.animator addBehavior:collisionBehavior];
 }
 
 
 - (void)didReceiveMemoryWarning
 {
 	[super didReceiveMemoryWarning];
-	// Dispose of any resources that can be recreated.
 }
 
 
@@ -96,9 +62,6 @@
 {
 	self.maxCenter = self.backViewController.view.center.y + self.topLayoutGuide.length;
 	self.minCenter = self.backViewController.view.center.y + self.frontViewController.view.frame.size.height - self.closedOffset;
-
-	self.topOffset = self.topLayoutGuide.length;
-	self.bottomOffset = self.frontViewController.view.frame.size.height - self.closedOffset;
 }
 
 
@@ -125,18 +88,16 @@
 
 - (void)open:(BOOL)open animated:(BOOL)animated
 {
-	if (open != self.open) {
-		_open = open;
+	_open = open;
 
-		if (animated) {
-			[self.animator removeBehavior:self.gravity];
+	void (^changeState)() = ^{
+		[self setViewPositionForCurrentState];
+	};
 
-			self.gravity.gravityDirection = CGVectorMake(0, open ? -1.0f : 1.0f);
-			[self.animator addBehavior:self.gravity];
-			[self.animator updateItemUsingCurrentState:self.frontViewController.view];
-		} else {
-			[self setViewPositionForCurrentState];
-		}
+	if (animated) {
+		[UIView animateWithDuration:0.4 animations:changeState];
+	} else {
+		changeState;
 	}
 }
 
@@ -165,11 +126,7 @@
 
 - (void)onPanFrontView:(UIPanGestureRecognizer *)recognizer
 {
-	if (recognizer.state == UIGestureRecognizerStateBegan) {
-		[self.animator removeBehavior:self.gravity];
-
-	} else if (recognizer.state == UIGestureRecognizerStateChanged) {
-
+	if (recognizer.state == UIGestureRecognizerStateChanged) {
 		CGPoint translation = [recognizer translationInView:self.view];
 		CGPoint center = CGPointMake(recognizer.view.center.x, recognizer.view.center.y + translation.y);
 
@@ -178,31 +135,9 @@
 			recognizer.view.center = center;
 			[recognizer setTranslation:CGPointMake(0, 0) inView:self.view];
 		}
-
-	} else if (recognizer.state == UIGestureRecognizerStateEnded) {
-
-		if (self.goingUp) {
-			self.gravity.gravityDirection = CGVectorMake(0, -1.0f);
-		} else {
-			self.gravity.gravityDirection = CGVectorMake(0, 1.0f);
-		}
-
-		[self.animator addBehavior:self.gravity];
-		[self.animator updateItemUsingCurrentState:self.frontViewController.view];
+	} else {
+		[self open:self.goingUp animated:YES];
 	}
 }
-
-
-- (void)collisionBehavior:(UICollisionBehavior *)behavior endedContactForItem:(id <UIDynamicItem>)item withBoundaryIdentifier:(id <NSCopying>)identifier
-{
-	NSLog(@"Collision Detected");
-}
-
-
-- (void)dynamicAnimatorDidPause:(UIDynamicAnimator *)animator
-{
-	[self.animator removeBehavior:self.gravity];
-}
-
 
 @end
